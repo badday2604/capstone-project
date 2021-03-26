@@ -89,7 +89,7 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
                   <div class="full">
                      <div class="center-desk">
-                        <div class="logo"> <a href="index.html"><img src="images/logo.jpg" alt="logo"/></a> </div>
+                        <div class="logo"> <a href="index.php"><img src="images/logo.jpg" alt="logo"/></a> </div>
                      </div>
                   </div>
                </div>
@@ -103,14 +103,30 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
                                         <li class="active"> <a href="product.php">Courses</a> </li>
                                         <li> <a href="tests.php"> Tests</a> </li>
                                         <li> <a href="contact.php">Contact</a> </li>
-                                        <li class="mean-last"> <a href="signup.php">signup</a> </li>
+                                        <li class="mean-last">
+                                          <?php 
+                                             if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                                echo "<a href='logout.php'>Logout</a>";
+                                             } else {
+                                                echo "<a href='signup.php'>signup</a>";
+                                             }
+                                          ?>
+                                       </li>
                                     </ul>
                                 </nav>
                             </div>
                     </div>
                </div>
                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-2">
-                  <li><a class="buy" href="login.php">Login</a></li>
+                  <li style="padding-top:25px">
+                  <?php 
+                     if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                        echo "<span class='welcome'><strong>Welcome</strong><span>";
+                     } else {
+                        echo "<a class='buy' href='login.php'>Login</a>";
+                     }
+                  ?>
+                  </li>
                </div>
             </div>
          </div>
@@ -197,7 +213,7 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
             </div>
          </div>
             <div class="copyright">
-               <p>Copyright 2021 All Right Reserved By <a href="index.html">EasyLearn</a></p>
+               <p>Copyright 2021 All Right Reserved By <a href="index.php">EasyLearn</a></p>
             </div>
          
       </div>
