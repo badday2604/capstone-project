@@ -17,8 +17,8 @@ if(isset($_SESSION["registered"]) && $_SESSION["registered"] === true) {
 }
 
 //define variable and set empty values
-$uid = $firstname = $lastname = $email = $phone = $pwd = $pwdrepeat = $cardno = "";
-$uidErr = $fnErr = $lnErr = $emailErr = $phoneErr = $pwdErr = $pwdrepeatErr = $cardnoErr = "";
+$uid = $pwd = "";
+$uidErr = $pwdErr = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Process payment
@@ -30,74 +30,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $uid = $_POST['username'];
     }
-    // Validate email
-    if(empty($_POST['email'])) {
-        $emailErr = "Email is required";
-    } else {
-        $email = sanitizeInput($_POST['email']);
-
-        // check if email address is well-formated
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $emailErr = "Invalid email format";
-        } 
-    }
-    // Validate first name
-    if(empty($_POST['firstname'])) {
-        $firstnameErr = "First Name is required";
-    } else {
-        $firstname = sanitizeInput($_POST['firstname']);
-
-        if (!preg_match("/^[a-zA-Z ]*$/", $firstName)) {  
-            $firstnameErr = "Only alphabets and white space are allowed";  
-        }
-    }
-    // Validate last name
-    if(empty($_POST['lastname'])) {
-        $lastNameErr = "Last Name is required";
-    } else {
-        $lastName = sanitizeInput($_POST['lastname']);
-
-        if (!preg_match("/^[a-zA-Z ]*$/", $lastName)) {  
-            $lastNameErr = "Only alphabets and white space are allowed";  
-        }
-    }
-    // Validate phone
-    if(empty($_POST['phone'])) {
-        $phoneErr = "Phone Number is required";
-    } else {
-        $phone = sanitizeInput($_POST['phone']);
-
-        if (!preg_match("/^[0-9]*$/", $phone) ) {  
-            $phoneErr = "Only numeric value is allowed.";
-        }
-    }
     // Validate password
-    if(empty($_POST['pwd'])) {
+    if(empty($_POST['password'])) {
         $pwdErr = "Password is required";
     } else {
-        if(empty($_POST['pwdrepeat'])) {
-            $pwdrepeatErr = "Password Repeat is required";
-        } else {
-            if(checkValidPwd($pwd, $pwdrepeat) !== false) {
-                $pwdErr = "Password does not meet requirement"; 
+        $pwd = $_POST['password'];
+    }
+    
+     // Validate credentials
+    if(empty($uidErr) && empty($pwdErr)){
+        // Prepare a select statement
+        $sql = "SELECT id, username, password FROM users WHERE username = ?";
+
+        if($stmt = mysqli_prepare($dbc, $sql)){
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($stmt, "s", $uid);
+            // Attempt to execute the prepared statement
+            if(mysqli_stmt_execute($stmt)){
+                // Store result
+                mysqli_stmt_store_result($stmt);
+                // Check if username exists, if yes then verify password
+                if(mysqli_stmt_num_rows($stmt) == 1){
+                    // Bind result variables
+                    mysqli_stmt_bind_result($stmt, $id, $username, $pwd);
+                    if(mysqli_stmt_fetch($stmt)){ 
+                        // Password is correct, so start a new session
+                        session_start();
+                        
+                        // Store data in session variables
+                        $_SESSION["loggedin"] = true;
+                        $_SESSION["id"] = $id;
+                        $_SESSION["username"] = $username;
+
+                        // Redirect user to welcome page
+                        header("location: index.php");
+                    }
+                }
             } else {
-                $pwd = $_POST['pwd'];
+                echo "Oops! Something went wrong. Please try again later.";
             }
         }
-    }
-    
-    // Validate card number
-    if(empty($_POST['cardno'])) {
-        $cardnoErr = "Card Number is required";
-    } else {
-        $cardno = sanitizeInput($_POST['cardno']);
 
-        if (!preg_match("/^[0-9]*$/", $cardno) ) {  
-            $cardnoErr = "Only numeric value is allowed.";  
-        }
-    }
+        // Close statement
+        mysqli_stmt_close($stmt);
 
-    
+    }
+     // Close connection
+    mysqli_close($dbc);
 }
 ?>
 
@@ -223,7 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <p><b>Please fill in your credentials to login.</b></p>
         <div class="login-form">
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                <input type="text" name="name" placeholder="Username...">
+                <input type="text" name="username" placeholder="Username...">
                 <input type="password" name="password" placeholder="Password...">
                 <button type="submit" name="submit">Log In</button>
                 <br>
@@ -294,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
             <div class="copyright">
-                <p>Copyright 2021 All Right Reserved By <a href="index.html">EasyLearn</a></p>
+                <p>Copyright 2021 All Right Reserved By <a href="index.php">EasyLearn</a></p>
             </div>
 
         </div>
