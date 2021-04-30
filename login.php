@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         
                         // Store data in session variables
                         $_SESSION["loggedin"] = true;
-                        $_SESSION["id"] = $id;
+                        $_SESSION["uid"] = $id;
                         $_SESSION["username"] = $username;
 
                         // Redirect user to welcome page
@@ -70,7 +70,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 echo "Oops! Something went wrong. Please try again later.";
             }
         }
-
         // Close statement
         mysqli_stmt_close($stmt);
 
@@ -169,8 +168,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <ul class="menu-area-main">
                                         <li> <a href="index.php">Home</a> </li>
                                         <li> <a href="about.php">About</a> </li>
-                                        <li> <a href="product.php">Courses</a> </li>
-                                        <li> <a href="tests.php"> Tests</a> </li>
+                                        <?php 
+                                            if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                                echo "<li> <a href='product.php'>Courses</a> </li>";
+                                            }
+                                        ?>
                                         <li> <a href="contact.php">Contact</a> </li>
                                         <li class="mean-last"> <a href="signup.php">signup</a> </li>
                                     </ul>
@@ -201,12 +203,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <br>
         <p><b>Please fill in your credentials to login.</b></p>
         <div class="login-form">
-            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                <input type="text" name="username" placeholder="Username...">
-                <input type="password" name="password" placeholder="Password...">
-                <button type="submit" name="submit">Log In</button>
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="main-form">
+                <input class="form-control" type="text" name="username" placeholder="Username..." value="<?php if (isset($uid)) echo $uid; ?>">
+                <input class="form-control" type="password" name="password" placeholder="Password..." value="<?php if (isset($pwd)) echo $pwd; ?>">
+                <button type="submit" name="submit" class="btn-normal">Log In</button>
                 <br>
-                <span class="error"><?php echo $uidErr; ?></span> &nbsp; &nbsp; &nbsp;
+                <span class="error"><?php echo $uidErr; ?></span> &nbsp; &nbsp; &nbsp; &nbsp;
                 <span class="error"><?php echo $pwdErr; ?></span>
             </form>
             <p><b>Don't have an account? <a href="signup.php">Sign up now.</a></b></p>

@@ -1,6 +1,8 @@
 <?php
 session_start();
 
+include ("includes/functions.inc.php");
+
 ?>
 
 <!DOCTYPE html>
@@ -60,7 +62,7 @@ session_start();
                   </div>
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                        <div class="top-box">
-                        <p>All our dreams can come true, if we have the courage to pursue them - Walt Disney</p>
+                       <p><?php echo "".get_random_quote().""; ?></p>
                     </div>
                   </div>
                </div>
@@ -82,8 +84,11 @@ session_start();
                            <ul class="menu-area-main">
                               <li> <a href="index.php">Home</a> </li>
                               <li class="active"> <a href="#">About</a> </li>
-                              <li> <a href="product.php">Courses</a> </li>
-                              <li> <a href="tests.php"> Tests</a> </li>
+                              <?php 
+                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                    echo "<li> <a href='product.php'>Courses</a> </li>";
+                                 }
+                              ?>
                               <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
@@ -298,22 +303,18 @@ session_start();
                   <div class="contact">
                      <h3>service</h3>
                       <ul class="lik">
-                    <li> <a href="#"> Data recovery</a></li>
-                         <li> <a href="#">Computer repair</a></li>
-                         <li> <a href="#">Mobile service</a></li>
-                         <li> <a href="#">Network solutions</a></li>
-                          <li> <a href="#">Technical support</a></li>
+                        <li> <a href="#">Categories</a></li>
+                        <li> <a href="#">Topics</a></li>
+                        <li> <a href="#">Courses</a></li>
+                        <li> <a href="#">Lessons</a></li>
+                        <li> <a href="#">Tutorials</a></li>
                   </div>
                </div>
-                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
-                  <div class="contact">
-                     <h3>IT NEXT THEME</h3>
-                     <span>Tincidunt elit magnis <br>
-                     nulla facilisis. Dolor <br>
-                  sagittis maecenas. <br>
-               Sapien nunc amet <br>
-            ultrices, </span>
-                  </div>
+               <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
+                     <div class="contact">
+                        <h3>About EasyLearn</h3>
+                        <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
+                     </div>
                </div>
             </div>
          </div>

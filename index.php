@@ -9,15 +9,15 @@ session_start();
    
 } */
 
-require("includes/mysqli_connect.php");
-$qry_str = "SELECT * FROM products WHERE quantity > 0 LIMIT 8";
-$r = mysqli_query($dbc, $qry_str);
+//require("includes/mysqli_connect.php");
 
 /* if($r) {
    while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
       echo $row['name']."<br/>";
    }
 } */
+
+include_once("includes/functions.inc.php");
 
 ?>
 
@@ -66,20 +66,20 @@ $r = mysqli_query($dbc, $qry_str);
             <div class="head_top">
                <div class="container">
                   <div class="row">
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
+                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="top-box">
                         <ul class="sociel_link">
-                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
-                     </ul>
-                    </div>
+                           <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        </ul>
+                     </div>
                   </div>
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
-                        <p>Nobody built like you, you design yourself - Jay-Z (Shawn Corey Carter)</p>
-                    </div>
+                        <div class="top-box">
+                        <p><?php echo "".get_random_quote().""; ?></p>
+                     </div>
                   </div>
                </div>
             </div>
@@ -100,8 +100,11 @@ $r = mysqli_query($dbc, $qry_str);
                            <ul class="menu-area-main">
                               <li class="active"> <a href="#">Home</a> </li>
                               <li> <a href="about.php">About</a> </li>
-                              <li> <a href="product.php">Courses</a> </li>
-                              <li> <a href="tests.php"> Tests</a> </li>
+                              <?php 
+                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                    echo "<li> <a href='product.php'>Courses</a> </li>";
+                                 }
+                              ?>
                               <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
@@ -133,6 +136,9 @@ $r = mysqli_query($dbc, $qry_str);
          <!-- end header inner --> 
       </header>
       <!-- end header -->
+      <?php 
+         if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+      ?>
       <section class="slider_section">
          <div id="main_slider" class="carousel slide banner-main" data-ride="carousel">
 
@@ -186,6 +192,10 @@ $r = mysqli_query($dbc, $qry_str);
 
       </section>
 
+
+      <?php 
+            }
+      ?>
 
 
 <!-- CHOOSE  -->
@@ -302,46 +312,7 @@ $r = mysqli_query($dbc, $qry_str);
       </div>
       <!-- end service -->
 
-      <!-- our product -->
-      <div class="product">
-         <div class="container">
-            <div class="row">
-               <div class="col-md-12">
-                  <div class="title">
-                     <h2>our <strong class="black">courses</strong></h2>
-                     <span>We package the courses with best services to make you a happy customer.</span>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
       <div class="product-bg">
-         <div class="product-bg-white">
-            <div class="container">
-               <div class="row">
-               <?php
-                  if($r) {
-                     while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
-                        echo "<div class='col-xl-3 col-lg-3 col-md-6 col-sm-12'>";
-                        echo "<div class='product-box'>";
-                        echo "<a href='product-detail.php?pid=".$row['id']."'><i><img src='".$row['img_url']."'/></i></a>";
-                        echo "<h3>".$row['name']."</h3>";
-                        echo "<span>$".$row['price']."</span>";
-                        echo "</div>";
-                        echo "</div>";
-                     }
-                  }
-
-               ?>
-               </div>
-               <div class="row">
-                  <div class="col-md-12">
-                     <a class="read-more" href="product.php">See More</a>
-                  </div>
-               </div>
-               
-            </div>
-         </div>
          <div class="Clients_bg_white">
             <div class="container">
                <div class="row">
@@ -364,8 +335,8 @@ $r = mysqli_query($dbc, $qry_str);
                               <div class="img_bg">
                                  <i><img src="images/lllll.png"/><span>Jone Due<br><strong class="date">12/02/2019</strong></span></i>
                               </div>
-                
-                <p>You guys rock! Thank you for making it painless, pleasant and most of all hassle free! I wish I would have thought of it first. I am really satisfied with my first laptop service.<br>
+                     
+                  <p>You guys rock! Thank you for making it painless, pleasant and most of all hassle free! I wish I would have thought of it first. I am really satisfied with my first laptop service.<br>
                 You guys rock! Thank you for making it painless, pleasant and most of all hassle free! I wish I would have thought of it first. I am </p>
                 
               </div>
@@ -410,7 +381,6 @@ $r = mysqli_query($dbc, $qry_str);
                <div class="col-xl-7 col-lg-7 col-md-7 col-sm-12">
                   <div class="yellow-box">
                      <h3>REQUEST A FREE QUOTE<i><img src="icon/calll.png"/></i></h3>
-                     
                      <p>Get answers and advice from people you want it from.</p>
                   </div>
                </div>
@@ -473,17 +443,17 @@ $r = mysqli_query($dbc, $qry_str);
                   <div class="contact">
                      <h3>service</h3>
                       <ul class="lik">
-                        <li> <a href="#">Data recovery</a></li>
-                        <li> <a href="#">Computer repair</a></li>
-                        <li> <a href="#">Mobile service</a></li>
-                        <li> <a href="#">Network solutions</a></li>
-                        <li> <a href="#">Technical support</a></li>
+                        <li> <a href="#">Categories</a></li>
+                        <li> <a href="#">Topics</a></li>
+                        <li> <a href="#">Courses</a></li>
+                        <li> <a href="#">Lessons</a></li>
+                        <li> <a href="#">Tutorials</a></li>
                   </div>
                </div>
                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                   <div class="contact">
                      <h3>About EasyLearn</h3>
-                     <span>Tincidunt elit magnis nulla facilisis. Dolor Sapien nunc amet ultrices, </span>
+                     <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
                   </div>
                </div>
             </div>

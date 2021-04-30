@@ -1,72 +1,10 @@
 <?php
 session_start();
 
+
 include("includes/functions.inc.php");
-require("includes/mysqli_connect.php");
 
-$showErr = false;
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-   
-//define variable and set empty values
-$name = $email = $phone = $message = "";
-$nameErr = $emailErr = $phoneErr = $mesasgeErr = "";
-
-// Validate name
-if(empty($_POST['name'])) {
-   $nameErr = "Please provide your name";
-} else {
-   $name = sanitizeInput($_POST['name']);
-}
-
-// Validate email
-if(empty($_POST['email'])) {
-   $emailErr = "Please provide your correct email";
-} else {
-   $email = sanitizeInput($_POST['email']);
-
-   // check if email address is well-formated
-   if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $emailErr = "Invalid email format";
-   } 
-}
-
-// Validate phone
-if(!empty($_POST['phone'])) {
-   $phone = sanitizeInput($_POST['phone']);
-   if(!preg_match('/^[0-9\-\(\)\/\+\s]*$/', $phone)) {
-      $phoneErr = "Incorrect phone number format";
-   }
-}
-
-// Validate phone
-if(!empty($_POST['message'])) {
-   $message = sanitizeInput($_POST['message']);
-}
-
-if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)) {
-   $sql = "INSERT INTO contact (name,email,phone,message) VALUES (?, ?, ?, ?)";
-   if($stmt = mysqli_prepare($dbc, $sql)){
-      // Bind variables to the prepared statement as parameters
-      mysqli_stmt_bind_param($stmt, "ssss", $name, $email, $phone, $message);
-
-      // Attempt to execute the prepared statement
-      if(mysqli_stmt_execute($stmt)){
-         // Redirect to login page
-         echo "Successfully added your message, we will contact you as soon as possible";
-      } else{
-         echo "Oops! Something went wrong. Please try again later.";
-      }
-      // Close statement
-      mysqli_stmt_close($stmt);
-   }
-   // Close connection
-   mysqli_close($dbc);
-} else {
-   $showErr = true;
-}
-
-}
+include("includes/dbPDO.php");
 
 ?>
 <!DOCTYPE html>
@@ -99,6 +37,14 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
       <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+      <style>
+         .correct {
+            color: green;
+         }
+         .incorrect {
+            color: red;
+         }
+      </style>
    </head>
    <!-- body -->
    <body class="main-layout">
@@ -113,21 +59,21 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
          <div class="header">
             <div class="head_top">
                <div class="container">
-                  <div class="row">
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
-                        <ul class="sociel_link">
-                        <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
-                     </ul>
-                    </div>
-                  </div>
-                  <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
-                        <p>The simple act of paying attention can take you a long way - Keanu Reeves</p>
-                    </div>
+                     <div class="row">
+                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="top-box">
+                           <ul class="sociel_link">
+                           <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        </ul>
+                     </div>
+                     </div>
+                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="top-box">
+                        <p><?php echo "".get_random_quote().""; ?></p>
+                     </div>
                   </div>
                </div>
             </div>
@@ -151,9 +97,10 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                               <?php 
                                  if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
                                     echo "<li> <a href='product.php'>Courses</a> </li>";
+                                    echo "<li class='active'> <a href='#'>Tests</a> </li>";
                                  }
                               ?>
-                              <li class="active"> <a href="#">Contact</a> </li>
+                              <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
                                  if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
@@ -184,72 +131,85 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
          <!-- end header inner --> 
       </header>
       <!-- end header -->
+
       <div class="brand_color">
-        <div class="container">
+         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <div class="titlepage">
-                        <h2>Contact Us</h2>
-                    </div>
-                </div>
+               <div class="col-md-12">
+                  <div class="titlepage">
+                        <h2>Tests Detail</h2>
+                  </div>
+               </div>
             </div>
-        </div>
+      </div>
+   </div>
 
-    </div>
+   <!-- Lastestnews -->
+   <div class="Lastestnews blog">
+      <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
+         <div class="container">
+               <div class="row">
+                  <div class="col-md-12">
+                     <?php 
+                     if(isset($_GET['qId'])) {
+                        $quizId = $_GET['qId'];
+                        $questions = get_questions_by_quiz_id($quizId);
+                        $answers = [];
+                        if($questions) {
+                           foreach($questions as $qId => $ques) {
+                              $desc = $ques['description'];
+                              echo "<strong>".htmlentities($desc)."</strong><br>";
 
-    <!-- contact -->
-    <div class="contact">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <form class="main_form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
-                        <div class="row">
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                <input class="form-control" placeholder="Your name" type="text" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
-                                <?php 
-                                 if(!empty($nameErr)) {
-                                    echo "".$nameErr;
+                              $questionId = $qId;
+                              //echo $questionId;
+                              
+                              $answers = get_answers_by_question_id($questionId);
+                              //print_r($answers);
+                              if($answers) {
+                                 foreach($answers as $aId => $answer) {
+                                    $id = $aId;
+                                    //echo $id."<br>";
+                                    $answer_desc = $answer['answer'];
+                                    $correct_answer = $answer['correct_answer'];
+                                    
+                                    echo "<div class='form-check'>";
+                                    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+                                       echo "<input class='form-check-input' type='radio' name='".$qId."' value='".$aId."-".$correct_answer."' >";
+                                       if($correct_answer == 1) {
+                                          echo "<label class='form-check-label correct'>".htmlentities($answer_desc)."</label>";
+                                       } else {
+                                          echo "<label class='form-check-label incorrect'>".htmlentities($answer_desc)."</label>";
+                                       }
+                                    } else {
+                                       echo "<input class='form-check-input' type='radio' name='".$qId."' value='".$aId."-".$correct_answer."' >";
+                                       echo "<label class='form-check-label'>".htmlentities($answer_desc)."</label>";
+                                    }
+                                    echo "</div>";
+                                    //echo "--".$answer_desc."-".$correct_answer."<br>";
                                  }
+                              }
 
-                                 ?>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                <input class="form-control" placeholder="Email" type="text" name="email" value="<?php if(isset($_POST['email'])) echo $_POST['email']; ?>">
-                                <?php 
-                                 if(!empty($emailErr)) {
-                                    echo "".$emailErr;
-                                 }
+                              echo "<br>";
+                           }
 
-                                 ?>
-                            </div>
-                            <div class=" col-md-12">
-                                <input class="form-control" placeholder="Phone" type="text" name="phone" value="<?php if(isset($_POST['phone'])) echo $_POST['phone']; ?>">
-                                <?php 
-                                 if(!empty($phoneErr)) {
-                                    echo "".$phoneErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class="col-md-12">
-                                <textarea class="textarea" placeholder="Message" name="message"><?php if(isset($_POST['message'])) echo $_POST['message']; ?></textarea>
-                                <?php 
-                                 if(!empty($mesasgeErr)) {
-                                    echo "".$mesasgeErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class=" col-md-12">
-                                <button class="send" type="submit">Send</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                           echo "<input type='submit' value='Submit'>";
+                           echo "<input type='reset' value='Reset'>";
+                        } else {
+                           echo "There are no questions related to this lesson.";
+                        }
+                     } else {
+                        echo "No quiz selected";
+                     }
+                     
+                     ?>
+                     
+                     </div>
+                  </div>
+               </div>
             </div>
-        </div>
-    </div>
-    <!-- end contact -->
+      </form>
+   </div>
+   <!-- end Lastestnews -->
       <!--  footer --> 
       <footr>
          <div class="footer">
@@ -257,20 +217,20 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                <div class="row">
                   <div class="col-md-6 offset-md-3">
                      <ul class="sociel">
-                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
                      </ul>
                   </div>
             </div>
             <div class="row">
                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                   <div class="contact">
-                     <h3>Contact Us</h3>
+                     <h3>conatct us</h3>
                      <span>123 Second Street Fifth Avenue,<br>
-                        Kitchener, Ontario<br>
-                        +519 123 4567</span>
+                       Manhattan, New York
+                        +987 654 3210</span>
                   </div>
                </div>
                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
@@ -309,7 +269,7 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
             </div>
          </div>
             <div class="copyright">
-               <p>Copyright 2021 All Right Reserved By <a href="index.php">EasyLearn</a></p>
+               <p>Copyright 2019 All Right Reserved By <a href="https://html.design/">Free html Templates</a></p>
             </div>
          
       </div>

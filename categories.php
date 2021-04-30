@@ -1,74 +1,25 @@
 <?php
+// Start the session
 session_start();
 
-include("includes/functions.inc.php");
-require("includes/mysqli_connect.php");
-
-$showErr = false;
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+// Check user login info
+/* if (!isset($_SESSION['login'])) {
+   header("Location:index.php");
+} else {
    
-//define variable and set empty values
-$name = $email = $phone = $message = "";
-$nameErr = $emailErr = $phoneErr = $mesasgeErr = "";
+} */
 
-// Validate name
-if(empty($_POST['name'])) {
-   $nameErr = "Please provide your name";
-} else {
-   $name = sanitizeInput($_POST['name']);
-}
+include ("includes/functions.inc.php");
 
-// Validate email
-if(empty($_POST['email'])) {
-   $emailErr = "Please provide your correct email";
-} else {
-   $email = sanitizeInput($_POST['email']);
 
-   // check if email address is well-formated
-   if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-      $emailErr = "Invalid email format";
-   } 
-}
-
-// Validate phone
-if(!empty($_POST['phone'])) {
-   $phone = sanitizeInput($_POST['phone']);
-   if(!preg_match('/^[0-9\-\(\)\/\+\s]*$/', $phone)) {
-      $phoneErr = "Incorrect phone number format";
+/* if($r) {
+   while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
+      echo $row['name']."<br/>";
    }
-}
-
-// Validate phone
-if(!empty($_POST['message'])) {
-   $message = sanitizeInput($_POST['message']);
-}
-
-if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)) {
-   $sql = "INSERT INTO contact (name,email,phone,message) VALUES (?, ?, ?, ?)";
-   if($stmt = mysqli_prepare($dbc, $sql)){
-      // Bind variables to the prepared statement as parameters
-      mysqli_stmt_bind_param($stmt, "ssss", $name, $email, $phone, $message);
-
-      // Attempt to execute the prepared statement
-      if(mysqli_stmt_execute($stmt)){
-         // Redirect to login page
-         echo "Successfully added your message, we will contact you as soon as possible";
-      } else{
-         echo "Oops! Something went wrong. Please try again later.";
-      }
-      // Close statement
-      mysqli_stmt_close($stmt);
-   }
-   // Close connection
-   mysqli_close($dbc);
-} else {
-   $showErr = true;
-}
-
-}
+} */
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
    <head>
@@ -101,7 +52,7 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
    </head>
    <!-- body -->
-   <body class="main-layout">
+   <body class="main-layout product_page">
       <!-- loader  -->
       <div class="loader_bg">
          <div class="loader"><img src="images/loading.gif" alt="#" /></div>
@@ -117,16 +68,16 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                        <div class="top-box">
                         <ul class="sociel_link">
-                        <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                        <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
+                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                         <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
                      </ul>
                     </div>
                   </div>
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                        <div class="top-box">
-                        <p>The simple act of paying attention can take you a long way - Keanu Reeves</p>
+                       <p><?php echo "".get_random_quote().""; ?></p>
                     </div>
                   </div>
                </div>
@@ -148,12 +99,9 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                            <ul class="menu-area-main">
                               <li > <a href="index.php">Home</a> </li>
                               <li> <a href="about.php">About</a> </li>
-                              <?php 
-                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                                    echo "<li> <a href='product.php'>Courses</a> </li>";
-                                 }
-                              ?>
-                              <li class="active"> <a href="#">Contact</a> </li>
+                              <li class="active"> <a href="#">Categories</a> </li>
+                              <li> <a href="tests.php"> Tests</a> </li>
+                              <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
                                  if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
@@ -184,72 +132,52 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
          <!-- end header inner --> 
       </header>
       <!-- end header -->
-      <div class="brand_color">
+       <div class="brand_color">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
                     <div class="titlepage">
-                        <h2>Contact Us</h2>
+                        <h2>Categories</h2>
                     </div>
                 </div>
             </div>
         </div>
 
     </div>
-
-    <!-- contact -->
-    <div class="contact">
-        <div class="container">
+      <!-- our product -->
+      <div class="product">
+         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <form class="main_form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
-                        <div class="row">
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                <input class="form-control" placeholder="Your name" type="text" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
-                                <?php 
-                                 if(!empty($nameErr)) {
-                                    echo "".$nameErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6">
-                                <input class="form-control" placeholder="Email" type="text" name="email" value="<?php if(isset($_POST['email'])) echo $_POST['email']; ?>">
-                                <?php 
-                                 if(!empty($emailErr)) {
-                                    echo "".$emailErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class=" col-md-12">
-                                <input class="form-control" placeholder="Phone" type="text" name="phone" value="<?php if(isset($_POST['phone'])) echo $_POST['phone']; ?>">
-                                <?php 
-                                 if(!empty($phoneErr)) {
-                                    echo "".$phoneErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class="col-md-12">
-                                <textarea class="textarea" placeholder="Message" name="message"><?php if(isset($_POST['message'])) echo $_POST['message']; ?></textarea>
-                                <?php 
-                                 if(!empty($mesasgeErr)) {
-                                    echo "".$mesasgeErr;
-                                 }
-
-                                 ?>
-                            </div>
-                            <div class=" col-md-12">
-                                <button class="send" type="submit">Send</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+               <div class="col-md-12">
+                  <div class="title">
+                     <span>We package the products with best services to make you a happy customer.</span>
+                  </div>
+               </div>
             </div>
-        </div>
-    </div>
-    <!-- end contact -->
+         </div>
+      </div>
+      <div class="product-bg">
+         <div class="product-bg-white">
+         <div class="container">
+            <div class="row">
+               <?php
+                  if($r) {
+                     while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
+                        echo "<div class='col-xl-3 col-lg-3 col-md-6 col-sm-12'>";
+                        echo "<div class='product-box'>";
+                        echo "<a href='product-detail.php?pid=".$row['id']."'><i><img src='".$row['img_url']."'/></i></a>";
+                        echo "<h3>".$row['name']."</h3>";
+                        echo "<span>$".$row['price']."</span>";
+                        echo "</div>";
+                        echo "</div>";
+                     }
+                  }
+
+               ?>
+               </div>
+            </div>
+         </div>
+         
       <!--  footer --> 
       <footr>
          <div class="footer">
@@ -259,7 +187,6 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                      <ul class="sociel">
                          <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
                          <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
                          <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
                      </ul>
                   </div>
@@ -327,18 +254,16 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
       <script src="https:cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.js"></script>
       <script>
          $(document).ready(function(){
-         $(".fancybox").fancybox({
-         openEffect: "none",
-         closeEffect: "none"
-         });
-         
-         $(".zoom").hover(function(){
-         
-         $(this).addClass('transition');
-         }, function(){
-         
-         $(this).removeClass('transition');
-         });
+            $(".fancybox").fancybox({
+               openEffect: "none",
+               closeEffect: "none"
+            });
+            
+            $(".zoom").hover(function(){
+               $(this).addClass('transition');
+            }, function(){
+               $(this).removeClass('transition');
+            });
          });
          
       </script> 

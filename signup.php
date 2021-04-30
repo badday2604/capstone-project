@@ -6,8 +6,8 @@ require('includes/mysqli_connect.php');
 require('includes/functions.inc.php');
 
 //define variable and set empty values
-$uid = $firstname = $lastname = $email = $phone = $pwd = $pwdrepeat = $cardno = "";
-$uidErr = $fnErr = $lnErr = $emailErr = $phoneErr = $pwdErr = $pwdrepeatErr = $cardnoErr = "";
+$uid = $name = $email = $pwd = $pwdrepeat = $goal = "";
+$uidErr = $nameErr = $emailErr = $pwdErr = $pwdrepeatErr = $goalErr = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Process payment
@@ -15,9 +15,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Validate username
     if(empty($_POST['username'])) {
-        $uidErr = "Username is required";
+        $uidErr = "This field is required";
     } else {
         $uid = $_POST['username'];
+        // Prepare a select statement
+        $sql_id = "SELECT id FROM users WHERE username = ?";
+        if($stmt = mysqli_prepare($dbc, $sql_id)) {
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($stmt, "s", $uid);
+            
+            // Set parameters
+            $uid = trim($_POST["username"]);
+            
+            // Attempt to execute the prepared statement
+            if(mysqli_stmt_execute($stmt)){
+                /* store result */
+                mysqli_stmt_store_result($stmt);
+                
+                if(mysqli_stmt_num_rows($stmt) == 1){
+                    $uidErr = "This username is already taken.";
+                } else{
+                    $uid = trim($_POST["username"]);
+                }
+            } else{
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+        }
     }
     // Validate email
     if(empty($_POST['email'])) {
@@ -31,70 +54,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } 
     }
     // Validate first name
-    if(empty($_POST['firstname'])) {
-        $fnErr = "First Name is required";
+    if(empty($_POST['name'])) {
+        $nameErr = "This field is required";
     } else {
-        $fn = sanitizeInput($_POST['firstname']);
+        $name = sanitizeInput($_POST['name']);
 
-        if (!preg_match("/^[a-zA-Z ]*$/", $fn)) {  
-            $fnErr = "Only alphabets and white space are allowed";  
-        }
-    }
-    // Validate last name
-    if(empty($_POST['lastname'])) {
-        $lnErr = "Last Name is required";
-    } else {
-        $ln = sanitizeInput($_POST['lastname']);
-
-        if (!preg_match("/^[a-zA-Z ]*$/", $ln)) {  
-            $lnErr = "Only alphabets and white space are allowed";  
-        }
-    }
-    // Validate phone
-    if(empty($_POST['phone'])) {
-        $phoneErr = "Phone Number is required";
-    } else {
-        $phone = sanitizeInput($_POST['phone']);
-
-        if (!preg_match("/^[0-9]*$/", $phone) ) {  
-            $phoneErr = "Only numeric value is allowed.";
+        if (!preg_match("/^[a-zA-Z ]*$/", $name)) {
+            $nameErr = "Only alphabets and white space are allowed";  
         }
     }
     // Validate password
-    if(empty($_POST['pwd'])) {
-        $pwdErr = "Password is required";
+    if(empty($_POST['pwd']) || empty($_POST['pwdrepeat'])) {
+        $pwdErr = $pwdrepeatErr = "This field is required";
     } else {
-        if(empty($_POST['pwdrepeat'])) {
-            $pwdrepeatErr = "Password Repeat is required";
+        $pwd = sanitizeInput($_POST['pwd']);
+        $pwdrepeat = sanitizeInput($_POST['pwdrepeat']);
+
+        if(strcmp($pwd, $pwdrepeat) != 0) {
+            $pwdErr = $pwdrepeatErr = "These fields should be the same";
         } else {
-            if(checkValidPwd($pwd, $pwdrepeat) !== false) {
+            if(!checkValidPwd($pwd)) {
                 $pwdErr = "Password does not meet requirement"; 
             } else {
-                $pwd = $_POST['pwd'];
+                $pwdErr = "";
             }
         }
     }
-    
-    // Validate card number
-    if(empty($_POST['cardno'])) {
-        $cardnoErr = "Card Number is required";
+    // Validate goal
+    if(empty($_POST['goal'])) {
+        $goalErr = "Goal error";
     } else {
-        $cardno = sanitizeInput($_POST['cardno']);
-
-        if (!preg_match("/^[0-9]*$/", $cardno) ) {  
-            $cardnoErr = "Only numeric value is allowed.";  
-        }
+        $goal = sanitizeInput($_POST['goal']);
     }
 
     $uType = 2;
-
-    if(empty($uidErr) && empty($fnErr) && empty($lnErr) && empty($emailErr) && empty($phoneErr) && empty($pwdErr) && empty($pwdrepeatErr) && empty($cardnoErr)) {
+    /* echo $name."-";
+    echo $uid."-";
+    echo $pwd."-";
+    echo $email."-";
+    echo $goal; */
+    
+    if(empty($uidErr) && empty($nameErr) && empty($emailErr) && empty($pwdErr) && empty($pwdrepeatErr) && empty($goalErr)) {
         $sql = "INSERT INTO users
-        (username, password, type, first_name, last_name, email, phone, card_no)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        (username, password, type, name, email, goal)
+        VALUES (?, ?, ?, ?, ?, ?)";
         if($stmt = mysqli_prepare($dbc, $sql)) {
             // Bind variables to the prepared statement as parameters
-            mysqli_stmt_bind_param($stmt, "ssisssss", $uid, $pwd, $uType, $fn, $ln, $email, $phone, $cardno);
+            mysqli_stmt_bind_param($stmt, "ssissi", $uid, $pwd, $uType, $name, $email, $goal);
 
             // Attempt to execute the prepared statement
             if(mysqli_stmt_execute($stmt)){
@@ -112,8 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Close connection
     mysqli_close($dbc);
 }
-?>
 
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -151,7 +157,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .error {
             color: red;
         }
-
+        .description {
+            font-size: .8em;
+        }
+        .description > ul > li {
+            list-style-type: circle;
+        }
     </style>
 </head>
 <!-- body -->
@@ -203,8 +214,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <ul class="menu-area-main">
                                         <li> <a href="index.php">Home</a> </li>
                                         <li> <a href="about.php">About</a> </li>
-                                        <li> <a href="product.php">Courses</a> </li>
-                                        <li> <a href="tests.php"> Tests</a> </li>
+                                        <?php 
+                                            if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                                echo "<li> <a href='product.php'>Courses</a> </li>";
+                                            }
+                                        ?>
                                         <li> <a href="contact.php">Contact</a> </li>
                                         <li class="mean-last"> <a href="signup.php">signup</a> </li>
                                     </ul>
@@ -235,21 +249,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <div class="container">
         <div class="signup-form">
-            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post">
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" id="signupform">
                 <div class="form-group">
                     <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" value="<?php if(isset($_POST['username'])) echo $_POST['username']; ?>">
                     <span class="error"><?php echo $uidErr; ?></span>
                 </div>
                 <div class="form-group">
-                    <label for="firstname">First name</label>
-                    <input type="text" class="form-control" id="firstname" name="firstname" value="<?php if(isset($_POST['firstname'])) echo $_POST['firstname']; ?>">
-                    <span class="error"><?php echo $fnErr; ?></span>
-                </div>
-                <div class="form-group">
-                    <label for="lastname">Last name</label>
-                    <input type="text" class="form-control" id="lastname" name="lastname" value="<?php if(isset($_POST['lastname'])) echo $_POST['lastname']; ?>">
-                    <span class="error"><?php echo $lnErr; ?></span>
+                    <label for="firstname">Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="<?php if(isset($_POST['name'])) echo $_POST['name']; ?>">
+                    <span class="error"><?php echo $nameErr; ?></span>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -257,12 +266,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <span class="error"><?php echo $emailErr; ?></span>
                 </div>
                 <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="text" class="form-control" id="phone" name="phone" value="<?php if(isset($_POST['phone'])) echo $_POST['phone']; ?>">
-                    <span class="error"><?php echo $phoneErr; ?></span>
-                </div>
-                <div class="form-group">
                     <label for="pwd">Password</label>
+                    <span class="description">
+                        <ul>
+                            <li>Must be a minimum of 8 characters</li>
+                            <li>Must contain at least 1 number</li>
+                        </ul>                    
+                    </span>
                     <input type="password" class="form-control" id="pwd" name="pwd" value="<?php if(isset($_POST['pwd'])) echo $_POST['pwd']; ?>">
                     <span class="error"><?php echo $pwdErr; ?></span>
                 </div>
@@ -272,13 +282,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <span class="error"><?php echo $pwdrepeatErr; ?></span>
                 </div>
                 <div class="form-group">
-                    <label for="cardno">Card Number</label>
-                    <input type="text" class="form-control" id="cardno" name="cardno" value="<?php if(isset($_POST['cardno'])) echo $_POST['cardno']; ?>">
-                    <span class="error"><?php echo $cardnoErr; ?></span>
+                    <label for="goal">Select goal (minutes per day):</label>
+                    <select class="form-control" id="goal" form="signupform" name="goal">
+                        <option>15</option>
+                        <option>30</option>
+                        <option>45</option>
+                        <option>60</option>
+                    </select>
                 </div>
 
-                <button type="submit" name="submit">Sign Up</button>
+                <input type="submit" name="submit" value="Sign Up">
+                <input type="reset" value="Reset">
                 <br />
+                Already have an account? <a href="login.php">Login here</a>.
                 <br />
             </form>
         </div>

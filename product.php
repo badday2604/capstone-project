@@ -3,21 +3,24 @@
 session_start();
 
 // Check user login info
-/* if (!isset($_SESSION['login'])) {
+if (!isset($_SESSION['loggedin']) || $_SESSION["loggedin"] === false) {
    header("Location:index.php");
 } else {
-   
-} */
+   $userId = $_SESSION["uid"];
+}
 
-require("includes/mysqli_connect.php");
-$qry_str = "SELECT * FROM products WHERE quantity > 0";
-$r = mysqli_query($dbc, $qry_str);
+include_once("includes/functions.inc.php");
 
-/* if($r) {
-   while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
-      echo $row['name']."<br/>";
-   }
-} */
+include_once("includes/dbPDO.php");
+
+update_user_lessons(1, 1, 'detail', 10, 10, 12);
+
+/* $courses_id = 30;
+$lessons = get_lessons_by_course_id($courses_id); */
+
+
+//echo "asdasdas";
+//print_r($lessons);
 
 ?>
 
@@ -66,20 +69,20 @@ $r = mysqli_query($dbc, $qry_str);
             <div class="head_top">
                <div class="container">
                   <div class="row">
-                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
+                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                        <div class="top-box">
                         <ul class="sociel_link">
-                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
-                     </ul>
-                    </div>
+                           <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                           <li> <a href="#"><i class="fa fa-linkedin"></i></a></li>
+                        </ul>
+                     </div>
                   </div>
                   <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
-                       <div class="top-box">
-                        <p>Don't count the days, make the days count - Muhammad Ali</p>
-                    </div>
+                     <div class="top-box">
+                     <p><?php echo "".get_random_quote().""; ?></p>
+                     </div>
                   </div>
                </div>
             </div>
@@ -100,8 +103,11 @@ $r = mysqli_query($dbc, $qry_str);
                            <ul class="menu-area-main">
                               <li > <a href="index.php">Home</a> </li>
                               <li> <a href="about.php">About</a> </li>
-                              <li class="active"> <a href="#">Courses</a> </li>
-                              <li> <a href="tests.php"> Tests</a> </li>
+                              <?php 
+                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                    echo "<li class='active'> <a href='product.php'>Courses</a> </li>";
+                                 }
+                              ?>
                               <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
@@ -151,33 +157,61 @@ $r = mysqli_query($dbc, $qry_str);
             <div class="row">
                <div class="col-md-12">
                   <div class="title">
-                     <span>We package the products with best services to make you a happy customer.</span>
+                     <span>Available categories and topics: </span>
+                     <br>
                   </div>
                </div>
-            </div>
+            </div>            
          </div>
       </div>
-      <div class="product-bg">
-         <div class="product-bg-white">
-         <div class="container">
-            <div class="row">
-               <?php
-                  if($r) {
-                     while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
-                        echo "<div class='col-xl-3 col-lg-3 col-md-6 col-sm-12'>";
-                        echo "<div class='product-box'>";
-                        echo "<a href='product-detail.php?pid=".$row['id']."'><i><img src='".$row['img_url']."'/></i></a>";
-                        echo "<h3>".$row['name']."</h3>";
-                        echo "<span>$".$row['price']."</span>";
-                        echo "</div>";
-                        echo "</div>";
-                     }
-                  }
+      
+      <div class="container">
+         <div class="wrapper">
 
+         <?php 
+         $categories = get_all_categories();
+         if($categories) {
+
+            foreach($categories as $cId => $cat) {
+
+         ?>
+            <div class="accordion">
+               <div class="accordion_tab">
+                  <?php echo $cat['name']; ?>
+                  <div class="accordion_arrow">
+                     <img src="https://i.imgur.com/PJRz0Fc.png" alt="arrow">
+                  </div>
+               </div>
+               <div class="accordion_content">
+               <?php 
+                  $topics = get_topics_by_category_id($cId);
+                  if($topics) {
+                     foreach($topics as $tId => $top) {
+                     
                ?>
+               
+                  <div class="accordion_item">
+                  <p class="item_title"><?php echo "<a href='product-detail.php?tId=".$tId."'>".$top['name']."</a>"; ?></p>
+                  <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Architecto quis sed praesentium dolorem hic ipsam maiores magnam voluptatem deleniti sunt.</p>
+                  </div>
+                  <?php 
+                     }
+                  } else {
+                     echo "No item in this category";
+                  }
+                  
+                  ?>
                </div>
             </div>
+         <?php
+                  
+            }
+         }
+         
+         ?>
          </div>
+      </div>
+      
          
       <!--  footer --> 
       <footr>
@@ -186,9 +220,9 @@ $r = mysqli_query($dbc, $qry_str);
                <div class="row">
                   <div class="col-md-6 offset-md-3">
                      <ul class="sociel">
-                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
                      </ul>
                   </div>
             </div>
@@ -265,7 +299,42 @@ $r = mysqli_query($dbc, $qry_str);
             }, function(){
                $(this).removeClass('transition');
             });
+
+            
+
          });
+
+         $(".accordion_tab").click(function(){
+            $(".accordion_tab").each(function(){
+               $(this).parent().removeClass("active");
+               $(this).removeClass("active");
+            });
+         $(this).parent().addClass("active");
+         $(this).addClass("active");
+      });
+
+         /* var t;
+         setInterval(function(){ 
+            var goalset = parseInt($("#goalset").val());
+            t = goalset+1;
+
+            console.log(goalset);
+            console.log(t);
+            goalset.innerHTML = t;
+            }, 1000); */
+
+         function loadDoc() {
+         var xhttp = new XMLHttpRequest();
+         xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+               document.getElementById("demo").innerHTML = this.responseText;
+            }
+         };
+         xhttp.open("POST", "includes/counttime.php", true);
+         xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+         xhttp.send("realgoal="+"4"+"&uid="+<?php echo $userId; ?>);
+         }
+
          
       </script> 
    </body>

@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+
+include("includes/functions.inc.php");
+include("includes/dbPDO.php");
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,7 +63,7 @@ session_start();
                      </div>
                      <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12">
                         <div class="top-box">
-                        <p>By failing to prepare, you are preparing to fail - Benjamin Franklin</p>
+                        <p><?php echo "".get_random_quote().""; ?></p>
                      </div>
                   </div>
                </div>
@@ -81,8 +85,12 @@ session_start();
                            <ul class="menu-area-main">
                               <li > <a href="index.php">Home</a> </li>
                               <li> <a href="about.php">About</a> </li>
-                              <li> <a href="product.php">Courses</a> </li>
-                              <li class="active"> <a href="#"> Tests</a> </li>
+                              <?php 
+                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                    echo "<li> <a href='product.php'>Courses</a> </li>";
+                                    echo "<li class='active'> <a href='#'>Tests</a> </li>";
+                                 }
+                              ?>
                               <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
@@ -115,8 +123,6 @@ session_start();
       </header>
       <!-- end header -->
 
-
-
       <div class="brand_color">
          <div class="container">
             <div class="row">
@@ -133,62 +139,30 @@ session_start();
     <div class="Lastestnews blog">
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <div class="titlepage">
+               <?php
+                  if(isset($_GET['lId'])) {
+                     $lId = $_GET['lId'];
+                     $quizzes = get_quizzes_by_lesson_id($lId);
+                     if($quizzes) {
+                        foreach($quizzes as $id => $quiz) {
+                           $questions = get_questions_by_quiz_id($id);
+               ?>
+                  <div class="quiz-choose col-md-12">
+                     <a href="test-detail.php?qId=<?php echo $id; ?>"><?php echo $quiz['name']; ?></a>
+                     <br>
+                     <span><?php echo "(".count($questions)." questions)"; ?></span>
+                  </div>
+                  
+               <?php 
+                        }
+                     } else {
+                        echo "No quizzes for this lesson";
+                     }
+                  } else {
+                     echo "No lesson seleted";
+                  }
+               ?>
 
-                        <span>It is a long established fact that a reader will be distracted by the readable <br>content of a page when looking at its layout. The point of using Lorem </span>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 margin">
-                    <div class="news-box">
-                        <figure><img src="images/1.jpg" alt="img" /></figure>
-                        <h3>Live With Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 margin">
-                    <div class="news-box">
-                        <figure><img src="images/2.jpg" alt="img" /></figure>
-                        <h3>Best Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 margin">
-                    <div class="news-box">
-                        <figure><img src="images/3.jpg" alt="img" /></figure>
-                        <h3>Live With Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
-                    <div class="news-box">
-                        <figure><img src="images/3.jpg" alt="img" /></figure>
-                        <h3>Live With Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
-                    <div class="news-box">
-                        <figure><img src="images/1.jpg" alt="img" /></figure>
-                        <h3>Live With Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
-                    <div class="news-box">
-                        <figure><img src="images/2.jpg" alt="img" /></figure>
-                        <h3>Best Music</h3>
-                        <span> March 20</span><span>Comment</span>
-                        <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, </p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -200,10 +174,10 @@ session_start();
                <div class="row">
                   <div class="col-md-6 offset-md-3">
                      <ul class="sociel">
-                         <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
-                         <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-facebook-f"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-twitter"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
+                        <li> <a href="#"><i class="fa fa-instagram"></i></a></li>
                      </ul>
                   </div>
             </div>

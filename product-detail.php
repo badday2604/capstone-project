@@ -9,7 +9,8 @@ session_start();
 
 } */
 require("includes/mysqli_connect.php");
-$pid = $_GET["pid"];
+include("includes/dbPDO.php")
+/* $pid = $_GET["pid"];
 
 if(!isset($pid) || $pid == "" || $pid < 1) {
    echo "There are no course chosen";
@@ -17,7 +18,9 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
     $qry_str = "SELECT * FROM products WHERE id = $pid";
    $r = mysqli_query($dbc, $qry_str);
 
-}
+} */
+
+
 
 ?>
 
@@ -100,8 +103,11 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
                            <ul class="menu-area-main">
                               <li > <a href="index.php">Home</a> </li>
                               <li> <a href="about.php">About</a> </li>
-                              <li class="active"> <a href="product.php">Courses</a> </li>
-                              <li> <a href="tests.php"> Tests</a> </li>
+                              <?php 
+                                 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
+                                    echo "<li class='active'> <a href='product.php'>Courses</a> </li>";
+                                 }
+                              ?>
                               <li> <a href="contact.php">Contact</a> </li>
                               <li class="mean-last">
                               <?php 
@@ -140,43 +146,83 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
             <div class="row">
                 <div class="col-md-12">
                     <div class="titlepage">
-                        <h2>Product Detail</h2>
+                        <h2>Courses Detail</h2>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-   <div class="about">
+   <!-- our product -->
+   <div class="product">
       <div class="container">
          <div class="row">
-            <?php
-               if($r) {
-                  $row = mysqli_fetch_array($r, MYSQLI_ASSOC);
-            ?>
-            <dir class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-               <div class="about_box">
-                  <figure>
-                     <img src="<?php echo $row['img_url'] !== '' ? $row['img_url'] : 'icon/ina.jpg'; ?>" />
-                  </figure>
+            <div class="col-md-12">
+               <div class="title">
+                  <span>
+                  <?php 
+                  if(isset($_GET['tId'])) {
+                     $tId = $_GET['tId'];
+                     $courses = get_courses_by_topic_id($tId);
+                     if($courses) {
+                        echo "There are ".count($courses)." courses for this topic:";
+                     }
+                     /* $topic = get_topic_by_id($tId);
+                     
+                     foreach($topic as $tId => $top) {
+                        echo $top['name'];
+                     } */
+                  } else {
+                     echo "No topic selected";
+                  }
+                  
+                  ?>
+                  </span>
+                  <br>
                </div>
-            </dir>
-            <dir class="col-xl-6 col-lg-6 col-md-12 col-sm-12">
-               <div class="about_box">
-                  <h3><?php echo $row['name']; ?></h3>
-                  <p><?php echo $row['description']; ?></p>
-                  <br/>
-                  <h3>$<?php echo $row['price']; ?></h3>
-                  <a href="<?php echo 'checkout.php?pid='.$row['id']?>" class="purchase">Purchase</a>
-               </div>
-            </dir>
-            <?php
-               }
-            ?>
-         </div>
+            </div>
+         </div>            
       </div>
    </div>
 
+   
+
+   <div class="about">
+      <div class="container">
+         <ul class="acc-list">
+         <?php 
+         if($courses) {
+            foreach($courses as $cId => $course) {
+               $lessons = get_lessons_by_course_id($cId);
+               
+         ?>
+         <li>
+            <h3><?php echo "(".count($lessons).") ".$course['name']; ?></h3>
+            <div class="answer">
+               <?php 
+               if($lessons) {
+                  foreach($lessons as $lId => $lesson) {
+                     echo "<p><a href='lessons.php?lId=".$lId."'>".$lesson['name']."</a></p>";
+                  }
+               } else {
+                  echo "<p>There are no lessons for this course</p>";
+               }
+
+               ?>
+               
+            </div>
+         </li>
+         <?php 
+            }
+         }
+         
+         ?>
+         </ul>
+         <br>
+         <button class="btn-normal" onclick="goBack()">Return</button>
+         <br>
+      </div>
+   </div>
 
     <!--  footer --> 
     <footr>
@@ -264,7 +310,23 @@ if(!isset($pid) || $pid == "" || $pid < 1) {
             }, function(){
                $(this).removeClass('transition');
             });
+
+            $('.acc-list > li > .answer').hide();
+            $('.acc-list > li > h3').click(function() {
+               if ($(this).parent().hasClass("active")) {
+                  $(this).parent().removeClass("active").find(".answer").slideUp();
+               } else {
+                  $(".acc-list > li.active .answer").slideUp();
+                  $(".acc-list > li.active").removeClass("active");
+                  $(this).parent().addClass("active").find(".answer").slideDown();
+               }
+               return false;
+            });
          });
+
+         function goBack() {
+            window.history.back();
+         }
          
       </script> 
    </body>
