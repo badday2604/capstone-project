@@ -2,8 +2,8 @@
 session_start();
 
 // Need the database connection:
-require('includes/mysqli_connect.php');
-require('includes/functions.inc.php');
+include('includes/mysqli_connect.php');
+include('includes/functions.inc.php');
 
 // Check if the user is already logged in, if yes then redirect him to welcome page
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){

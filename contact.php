@@ -2,7 +2,7 @@
 session_start();
 
 include("includes/functions.inc.php");
-require("includes/mysqli_connect.php");
+include("includes/mysqli_connect.php");
 
 $showErr = false;
 
