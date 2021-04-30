@@ -291,8 +291,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </select>
                 </div>
 
-                <input type="submit" name="submit" value="Sign Up">
-                <input type="reset" value="Reset">
+                <input type="submit" name="submit" value="Sign Up" class="btn-small">
+                <input type="reset" value="Reset" class="btn-small">
                 <br />
                 Already have an account? <a href="login.php">Login here</a>.
                 <br />
