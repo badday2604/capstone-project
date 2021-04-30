@@ -13,7 +13,8 @@ include_once("includes/functions.inc.php");
 
 include_once("includes/dbPDO.php");
 
-update_user_lessons(1, 1, 'detail', 10, 10, 12);
+//update_user_lessons(1, 1, 'detail', 10, 10, 12);
+
 
 /* $courses_id = 30;
 $lessons = get_lessons_by_course_id($courses_id); */
@@ -204,7 +205,7 @@ $lessons = get_lessons_by_course_id($courses_id); */
                </div>
             </div>
          <?php
-                  
+            
             }
          }
          
@@ -212,6 +213,40 @@ $lessons = get_lessons_by_course_id($courses_id); */
          </div>
       </div>
       
+
+      <div class="product">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-12">
+                  <div class="title">
+                     <span>Lessons you are attending: </span>
+                     <br>
+                  </div>
+               </div>
+            </div>            
+         </div>
+      </div>
+
+      <div class="container">
+         <div class="wrapper">
+            <div class="col-md-12 lessons-attending">
+            <?php
+            
+               $users = get_lessons_by_user_id($userId);
+               
+               if($users) {
+                  foreach($users as $user) {
+                     $lesson = get_lesson_by_id($user[1]);
+                     echo "<a href='lessons.php?lId=".$user[1]."'>".$lesson[1]."</a><br>";
+                  }
+               } else {
+                  echo "No lessons found";
+               }
+            ?>
+            </div>
+         </div>
+
+      </div>
          
       <!--  footer --> 
       <footr>
@@ -260,12 +295,8 @@ $lessons = get_lessons_by_course_id($courses_id); */
                </div>
                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                   <div class="contact">
-                     <h3>IT NEXT THEME</h3>
-                     <span>Tincidunt elit magnis <br>
-                     nulla facilisis. Dolor <br>
-                  sagittis maecenas. <br>
-               Sapien nunc amet <br>
-            ultrices, </span>
+                     <h3>ABOUT EASYLEARN</h3>
+                     <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
                   </div>
                </div>
             </div>

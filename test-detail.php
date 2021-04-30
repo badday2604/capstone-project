@@ -3,7 +3,6 @@ session_start();
 
 
 include("includes/functions.inc.php");
-
 include("includes/dbPDO.php");
 
 ?>
@@ -151,10 +150,16 @@ include("includes/dbPDO.php");
                <div class="row">
                   <div class="col-md-12">
                      <?php 
-                     if(isset($_GET['qId'])) {
-                        $quizId = $_GET['qId'];
+                     
+                     if(!isset($_GET['qId']) || !isset($_POST['qId'])) {
+                        if(isset($_GET['qId'])) {
+                           $quizId = $_GET['qId'];
+                        } else {
+                           $quizId = $_POST['qId'];
+                        }
                         $questions = get_questions_by_quiz_id($quizId);
                         $answers = [];
+                        $count = 0;
                         if($questions) {
                            foreach($questions as $qId => $ques) {
                               $desc = $ques['description'];
@@ -174,14 +179,17 @@ include("includes/dbPDO.php");
                                     
                                     echo "<div class='form-check'>";
                                     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-                                       echo "<input class='form-check-input' type='radio' name='".$qId."' value='".$aId."-".$correct_answer."' >";
+                                       echo "<input class='form-check-input' type='radio' name='".$qId.$aId."' value='".$correct_answer."' ";
+                                       if(isset($_POST[$qId.$aId])) echo "checked='checked'";
+                                       echo " >";
+                                       if(isset($_POST[$qId.$aId]) && $_POST[$qId.$aId] == '1') $count++;
                                        if($correct_answer == 1) {
                                           echo "<label class='form-check-label correct'>".htmlentities($answer_desc)."</label>";
                                        } else {
                                           echo "<label class='form-check-label incorrect'>".htmlentities($answer_desc)."</label>";
                                        }
                                     } else {
-                                       echo "<input class='form-check-input' type='radio' name='".$qId."' value='".$aId."-".$correct_answer."' >";
+                                       echo "<input class='form-check-input' type='radio' name='".$qId.$aId."' value='".$correct_answer."' >";
                                        echo "<label class='form-check-label'>".htmlentities($answer_desc)."</label>";
                                     }
                                     echo "</div>";
@@ -191,9 +199,10 @@ include("includes/dbPDO.php");
 
                               echo "<br>";
                            }
-
-                           echo "<input type='submit' value='Submit'>";
-                           echo "<input type='reset' value='Reset'>";
+                           echo "Correct answers: ".$count."<br>";
+                           echo "<input type='hidden' name='qId' value='".$quizId."'>";
+                           echo "<input class='btn-small' type='submit' value='Submit'>";
+                           echo "<input class='btn-small' type='button' value='Go Back' onclick='goBack()'>";
                         } else {
                            echo "There are no questions related to this lesson.";
                         }
@@ -258,12 +267,8 @@ include("includes/dbPDO.php");
                </div>
                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                   <div class="contact">
-                     <h3>IT NEXT THEME</h3>
-                     <span>Tincidunt elit magnis <br>
-                     nulla facilisis. Dolor <br>
-                  sagittis maecenas. <br>
-               Sapien nunc amet <br>
-            ultrices, </span>
+                  <h3>ABOUT EASYLEARN</h3>
+                     <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
                   </div>
                </div>
             </div>
@@ -300,6 +305,10 @@ include("includes/dbPDO.php");
          $(this).removeClass('transition');
          });
          });
+
+         function goBack() {
+            window.history.back();
+         }
          
       </script> 
    </body>

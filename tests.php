@@ -155,6 +155,7 @@ include("includes/dbPDO.php");
                   
                <?php 
                         }
+                        echo "<input type='button' onclick='goBack()' value='Back'>";
                      } else {
                         echo "No quizzes for this lesson";
                      }
@@ -215,12 +216,8 @@ include("includes/dbPDO.php");
                </div>
                  <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                   <div class="contact">
-                     <h3>IT NEXT THEME</h3>
-                     <span>Tincidunt elit magnis <br>
-                     nulla facilisis. Dolor <br>
-                  sagittis maecenas. <br>
-               Sapien nunc amet <br>
-            ultrices, </span>
+                  <h3>ABOUT EASYLEARN</h3>
+                     <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
                   </div>
                </div>
             </div>
@@ -257,6 +254,10 @@ include("includes/dbPDO.php");
          $(this).removeClass('transition');
          });
          });
+
+         function goBack() {
+            window.history.back();
+         }
          
       </script> 
    </body>
