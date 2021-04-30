@@ -276,6 +276,32 @@ function get_topic_by_id($tId) {
    return $topic;
 }
 
+function get_lesson_by_id($lId) {
+   $connection = create_connection();
+   $sql = sprintf(
+      'SELECT * FROM lessons 
+         %s'
+      , isset($lId) ? 'WHERE id = :lId' : ''
+   );
+   $bindings = [];
+   if (isset($lId)) {
+      $bindings[':lId'] = $lId;
+   }
+   $statement = $connection->prepare($sql);
+   $executed = $statement->execute($bindings);
+   $fetchedData = $statement->fetchAll(PDO::FETCH_ASSOC);
+   $lesson = array();
+   foreach($fetchedData as $row) {
+      $id = $row['id'];
+      $name = $row['name'];
+      $description = $row['description'];
+      $details = $row['details'];
+
+      $lesson = array($id, $name, $description, $details);
+   }
+   return $lesson;
+}
+
 function get_courses_by_topic_id($tId) {
    $connection = create_connection();
    $sql = sprintf(
@@ -343,33 +369,74 @@ function get_user_by_user_id($userid) {
 
 function update_user_actual_goal($id, $actual, $goal_date) {
    $connection = create_connection();
-   $sql = "UPDATE users SET actual=?, goaldate=? WHERE id=?";
+   $sql = "UPDATE users SET actual=?, goal_date=? WHERE id=?";
    $stmt = $connection->prepare($sql);
-   $stmt->execute([$actual, $goal_date, $id]);
+   $done = $stmt->execute([$actual, $goal_date, $id]);
 
-   return $stmt->rowCount();
+   if (!$done) {
+      //record not saved to db
+      echo $stmt->errorCode();
+   }
 }
 
 function update_user_lessons($userid, $lessonid, $detail, $progress, $completed, $result) {
    $connection = create_connection();
-   $sql = "SELECT * FROM users_lessons WHERE users_id = ? AND lessons_id = ?";
+   $sql = "SELECT * FROM users_lessons WHERE users_id = :userid AND lessons_id = :lessonid";
    $stmt = $connection->prepare($sql);
-   $rst = $stmt->execute([$userid, $lessonid]);
+   $stmt->bindParam(':userid', $userid, PDO::PARAM_INT, 11);
+   $stmt->bindParam(':lessonid', $lessonid, PDO::PARAM_INT, 11);
+   $rst = $stmt->execute();
 
-   if(($rst->rowCount()) >= 1) {
-      $sql_update = "UPDATE users_lessons SET detail = ?, progress = ?, completed = ?, result = ? WHERE users_id = ? AND lessons_id = ?";
+   if($stmt->rowCount() >= 1) {
+      $sql_update = "UPDATE users_lessons SET detail = :detail, progress = :progress, completed = :completed, result = :result WHERE users_id = :userid AND lessons_id = :lessonid";
       $stmt1 = $connection->prepare($sql_update);
-      $done = $stmt1->execute([$detail, $progress, $completed, $result, $userid, $lessonid]);
+      $stmt1->bindParam(':detail', $detail, PDO::PARAM_STR);
+      $stmt1->bindParam(':progress', $progress, PDO::PARAM_INT);
+      $stmt1->bindParam(':completed', $completed, PDO::PARAM_INT);
+      $stmt1->bindParam(':result', $result, PDO::PARAM_INT);
+      $stmt1->bindParam(':userid', $userid, PDO::PARAM_INT);
+      $stmt1->bindParam(':lessonid', $lessonid, PDO::PARAM_INT);
+      $done = $stmt1->execute();
       if(!$done) {
-         echo $stmt1->errorCode();
+         print_r($stmt1->errorInfo());
       }
    } else {
       $sql_insert = "INSERT INTO users_lessons (users_id, lessons_id, detail, progress, completed, result) VALUES (?,?,?,?,?,?)";
       $stmt2 = $connection->prepare($sql_insert);
-      $done = $stmt2->execute([$userid, $lessonid, $completed, $detail, $progress, $completed, $result]);
+      $done = $stmt2->execute([$userid, $lessonid, $detail, $progress, $completed, $result]);
       if(!$done) {
-         echo $stmt2->errorCode();
+         print_r($stmt2->errorInfo());
       }
    }
+}
+
+function get_lessons_by_user_id($userid){
+   $connection = create_connection();
+   $sql = sprintf(
+      'SELECT * FROM users_lessons 
+         %s'
+      , isset($userid) ? ' WHERE users_id = :userid' : ''
+   );
+   
+   $bindings = [];
+   if (isset($userid)) {
+      $bindings[':userid'] = $userid;
+   }
+   
+   $statement = $connection->prepare($sql);
+   $executed = $statement->execute($bindings);
+   $fetchedData = $statement->fetchAll(PDO::FETCH_ASSOC);
+   $users = [];
+   foreach ($fetchedData as $item) {
+      $userid = $item['users_id'];
+      $lessonid = $item['lessons_id'];
+      $detail = $item['detail'];
+      $progress = $item['progress'];
+      $completed = $item['completed'];
+      $result = $item['result'];
+      
+      array_push($users, array($userid, $lessonid, $detail, $progress, $completed, $result));
+   }
+   return $users;
 }
 
