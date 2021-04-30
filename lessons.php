@@ -413,12 +413,8 @@ $user = get_user_by_user_id($userid);
                     </div>
                     <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12">
                         <div class="contact">
-                            <h3>IT NEXT THEME</h3>
-                            <span>Tincidunt elit magnis <br>
-                                nulla facilisis. Dolor <br>
-                                sagittis maecenas. <br>
-                                Sapien nunc amet <br>
-                                ultrices, </span>
+                        <h3>About EasyLearn</h3>
+                        <span>Online learning is the newest and most popular form of distance education today.We are proud to introduce to you.</span>
                         </div>
                     </div>
                 </div>
@@ -521,14 +517,6 @@ $user = get_user_by_user_id($userid);
 
                 setTimeout("timerCycle()", 1000);
             }
-        }
-
-        var myVar;
-
-        function mystart() {
-            myVar = setInterval(function() {
-                alert("First param");
-            }, 5000);
         }
 
         function post_to_update_user_actual_goal(current) {
