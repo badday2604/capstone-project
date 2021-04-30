@@ -2,22 +2,15 @@
 // Start the session
 session_start();
 
-// Check user login info
-/* if (!isset($_SESSION['login'])) {
-   header("Location:index.php");
-} else {
-   
-} */
-
-//require("includes/mysqli_connect.php");
-
-/* if($r) {
-   while($row = mysqli_fetch_array($r, MYSQLI_ASSOC)) {
-      echo $row['name']."<br/>";
-   }
-} */
-
 include_once("includes/functions.inc.php");
+
+include("includes/dbPDO.php");
+if(isset($_SESSION["uid"])) {
+   $userid = $_SESSION["uid"];
+} else {
+   header("Location: login.php");
+}
+$user = get_user_by_user_id($userid);
 
 ?>
 
@@ -124,7 +117,7 @@ include_once("includes/functions.inc.php");
                   <li style="padding-top:25px">
                   <?php 
                      if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                        echo "<span class='welcome'><strong>Welcome</strong><span>";
+                        echo "<span class='welcome'><strong>Welcome, ".$user[3]."</strong><span>";
                      } else {
                         echo "<a class='buy' href='login.php'>Login</a>";
                      }

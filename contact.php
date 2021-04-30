@@ -4,6 +4,14 @@ session_start();
 include("includes/functions.inc.php");
 include("includes/mysqli_connect.php");
 
+include("includes/dbPDO.php");
+if(isset($_SESSION["uid"])) {
+   $userid = $_SESSION["uid"];
+} else {
+   header("Location: login.php");
+}
+$user = get_user_by_user_id($userid);
+
 $showErr = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -172,7 +180,7 @@ if(empty($nameErr) && empty($emailErr) && empty($phoneErr) && empty($mesasgeErr)
                   <li style="padding-top:25px">
                   <?php 
                      if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                        echo "<span class='welcome'><strong>Welcome</strong><span>";
+                        echo "<span class='welcome'><strong>Welcome, ".$user[3]."</strong><span>";
                      } else {
                         echo "<a class='buy' href='login.php'>Login</a>";
                      }

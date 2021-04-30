@@ -5,12 +5,6 @@ session_start();
 include('includes/mysqli_connect.php');
 include('includes/functions.inc.php');
 
-// Check if the user is already logged in, if yes then redirect him to welcome page
-if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
-    header("Location: index.php");
-    exit;
-}
-
 $registered = "";
 if(isset($_SESSION["registered"]) && $_SESSION["registered"] === true) {
     $registered = "Registered successfully. Please log in to continue.";
@@ -168,11 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <ul class="menu-area-main">
                                         <li> <a href="index.php">Home</a> </li>
                                         <li> <a href="about.php">About</a> </li>
-                                        <?php 
-                                            if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                                                echo "<li> <a href='product.php'>Courses</a> </li>";
-                                            }
-                                        ?>
                                         <li> <a href="contact.php">Contact</a> </li>
                                         <li class="mean-last"> <a href="signup.php">signup</a> </li>
                                     </ul>

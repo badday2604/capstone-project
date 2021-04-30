@@ -2,26 +2,17 @@
 // Start the session
 session_start();
 
-// Check user login info
-if (!isset($_SESSION['loggedin']) || $_SESSION["loggedin"] === false) {
-   header("Location:index.php");
+
+include("includes/functions.inc.php");
+include("includes/dbPDO.php");
+if(isset($_SESSION["uid"])) {
+   $userid = $_SESSION["uid"];
 } else {
-   $userId = $_SESSION["uid"];
+   header("Location: login.php");
 }
+$user = get_user_by_user_id($userid);
 
-include_once("includes/functions.inc.php");
-
-include_once("includes/dbPDO.php");
-
-//update_user_lessons(1, 1, 'detail', 10, 10, 12);
-
-
-/* $courses_id = 30;
-$lessons = get_lessons_by_course_id($courses_id); */
-
-
-//echo "asdasdas";
-//print_r($lessons);
+?>
 
 ?>
 
@@ -106,7 +97,7 @@ $lessons = get_lessons_by_course_id($courses_id); */
                               <li> <a href="about.php">About</a> </li>
                               <?php 
                                  if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                                    echo "<li class='active'> <a href='product.php'>Courses</a> </li>";
+                                    echo "<li class='active'> <a href='#'>Courses</a> </li>";
                                  }
                               ?>
                               <li> <a href="contact.php">Contact</a> </li>
@@ -128,7 +119,7 @@ $lessons = get_lessons_by_course_id($courses_id); */
                   <li style="padding-top:25px">
                   <?php 
                      if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true) {
-                        echo "<span class='welcome'><strong>Welcome</strong><span>";
+                        echo "<span class='welcome'><strong>Welcome, ".$user[3]."</strong><span>";
                      } else {
                         echo "<a class='buy' href='login.php'>Login</a>";
                      }
@@ -231,8 +222,8 @@ $lessons = get_lessons_by_course_id($courses_id); */
          <div class="wrapper">
             <div class="col-md-12 lessons-attending">
             <?php
-            
-               $users = get_lessons_by_user_id($userId);
+               // $userId = $_SESSION['uid'];
+               $users = get_lessons_by_user_id($userid);
                
                if($users) {
                   foreach($users as $user) {
