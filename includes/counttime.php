@@ -1,31 +1,23 @@
 <?php
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // collect value of input field
-    $realgoal = $_REQUEST['realgoal'];
-    $uid = $_REQUEST['uid'];
+include("dbPDO.php");
 
-    echo $realgoal."-".$uid;
-    if (empty($realgoal)) {
-        echo "Goal is empty";
-    } else {
-        $mysqli = new mysqli("localhost", "root", "", "capstone");
-        // Check connection
-        if($mysqli === false){
-            die("ERROR: Could not connect. " . $mysqli->connect_error);
-        }
-        // Attempt update query execution
-        //$sql = "UPDATE users SET actual=$realgoal WHERE id=$uid";
-        /* if($mysqli->query($sql) === true){
-            echo $goal;
-        } else{
-            echo "ERROR: Could not able to execute $sql. " . $mysqli->error;
-        } */
+$json = file_get_contents('php://input');
+$dataObject = json_decode($json);
+$dataArray = json_decode($json, true);
 
-        // Close connection
-        $mysqli->close();
+//print_r($dataArray);
 
-    }
+$userid = intval($dataArray['userid']);
+$actual_goal = intval($dataArray['actual']);
+$today = date("Ymd");
+
+$result = update_user_actual_goal($userid, $actual_goal, $today);
+
+if($result < 0) {
+    echo "Fail to update";
 }
 
-?>
+
+
+
