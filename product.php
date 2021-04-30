@@ -354,7 +354,7 @@ $user = get_user_by_user_id($userid);
          };
          xhttp.open("POST", "includes/counttime.php", true);
          xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-         xhttp.send("realgoal="+"4"+"&uid="+<?php echo $userId; ?>);
+         xhttp.send("realgoal="+"4"+"&uid="+<?php echo $userid; ?>);
          }
 
          

@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 include("includes/functions.inc.php");
 include("includes/dbPDO.php");
 
